@@ -1,0 +1,70 @@
+version: "3.8"
+
+
+
+services:
+
+
+
+  postgres:
+    container_name: cnsltng_postgres
+    image: postgres
+    volumes:
+      - ./_postgres:/data/postgres
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATA: /data/postgres
+    ports:
+      # <Port exposed> : < PostgreSQL Port running inside container>
+      - "5550:5432"
+    expose:
+      # Opens port 5450 on the container
+      - "5550"
+    networks:
+      db:
+
+  web:
+    build: .
+    environment:
+      DJANGO_SETTINGS_MODULE: root.settings
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+    command: >
+      bash -c "python manage.py makemigrations &&
+      python manage.py migrate &&
+      ( echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser(email='test@gmail.com',first_name='jbenitollorens', last_name='test',password='1234test')\" | python manage.py shell ) > /dev/null 2>&1 || true &&
+      "
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    image: backend-image
+    networks:
+      db:
+
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - .:/backend
+
+
+
+
+
+
+networks:
+  db:
+    driver: bridge
+  # node_net:
+  #   ipam:
+  #     driver: default
+  #     config:
+  #       - subnet: 172.29.0.0/16
+
+volumes:
+  _postgres: {}
