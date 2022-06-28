@@ -1,2 +1,2 @@
-# django-api
-Basic django api
+# music-chords-api
+Basic django api, to obtain chords notes
