@@ -3,6 +3,7 @@ from rest_framework.test import APIClient, APIRequestFactory
 from .utils import init_bbdd, note_chords
 from .models import Chord
 from .naming import ChordsNames
+import json
 
 # Create your tests here.
 class ChordsTest(TestCase):
@@ -28,3 +29,9 @@ class ChordsTest(TestCase):
 
     def test_get_chord_notes_Fm7(self):
         self.assertEqual(Chord.get_chord_notes("Fm7"), ["F", "G#", "C", "D#"])
+    
+    def test_get_chord_notes_Cmaj7(self):
+        url = "/chords/get_chord_notes/"
+        data= json.dumps(dict(chord_name="Cmaj7"))
+        r = self.client.post(url, data, content_type="application/json",)
+        self.assertEqual(r.json()["chord_notes"], ["C", "E", "G", "B"])
