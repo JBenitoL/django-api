@@ -9,9 +9,7 @@ pipeline {
     stage('Build') {
       agent any
       steps {
-        sh '''#!/usr/bin/env bash
-        echo I followed this tutorial!
-        '''
+        sh deploy.sh
       }
     }
   }
